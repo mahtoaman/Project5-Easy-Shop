@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
+const userModel = require("../models/userModel");
+const { isValidObjectId } = require("../validators/validation");
 
 // const authentication = async function (req, res, next) {
 //     try {
@@ -16,11 +17,14 @@ const mongoose = require("mongoose");
 
 const authentication = async (req, res, next) => {
   try {
-    let token = req.headers["x-api-key"] || req.headers["X-API-KEY"];
+    let token = req.headers.authorization;
+
+    // console.log(token)
     if (!token)
       return res
         .status(400)
         .send({ status: false, msg: "token must be present" });
+    token = req.headers.authorization.split(" ")[1];
 
     jwt.verify(token, "As calm as the sea", (err, decodedToken) => {
       if (err) {
@@ -38,4 +42,27 @@ const authentication = async (req, res, next) => {
   }
 };
 
-module.exports = { authentication };
+//=========================AUTHORIZATION FOR USER UDPATE===============================
+
+const isUserAuthorised = async (req, res, next) => {
+  let userId = req.params.userId;
+
+  if (!isValidObjectId(userId))
+    return res.status(403).send({ status: false, message: "Invalid UserId" });
+
+  let isUserPresent = await userModel.findById(userId);
+  if (!isUserPresent)
+    return res
+      .status(404)
+      .send({ status: false, message: "User does not exist" });
+
+  let loginUserId = req.headers.userId;
+  if (loginUserId !== userId) {
+    return res
+      .status(403)
+      .send({ status: false, message: "You are not authorised" });
+  }
+  next();
+};
+//-------------------------------------------------------------------------------------
+module.exports = { authentication, isUserAuthorised };
