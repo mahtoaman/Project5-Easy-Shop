@@ -1,8 +1,8 @@
-# Project5-Products-Management
+# Project5-EASY SHOP
 
 
-# productsManagement
-Project - Products Management
+# this project is similar to a shopping cart.
+Project - A shopping cart
 Key points
 In this project we will work feature wise. That means we pick one object like user, book, blog, etc at a time. We work through it's feature. The steps would be:
 We create it's model.
